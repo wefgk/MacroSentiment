@@ -73,7 +73,6 @@ class DataBaseManager:
                 cursor.executemany("""INSERT OR IGNORE INTO raw_news (title, link, description, pub_date)
                                         VALUES (:title, :link, :description, :date);""",cleaned_news)
                 
-                conn.commit()
                 logger.info("Successfully inserted")
         except sqlite3.Error as e:
             logger.error(e)
