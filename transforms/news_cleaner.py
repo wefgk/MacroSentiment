@@ -12,7 +12,7 @@ class NewsTransformer:
         self.mapping_cache=self._load_relationships_in_memory()
         self.countries_whitelist=self._load_whitelist_in_memory()
         self.alliences_whitelist=self._load_alliances_whitelist()
-        logger.info("All data for the cleaner loaded into memory")
+        logger.info("All data for the cleaner loaded into memory \n")
 
     def _load_relationships_in_memory(self)->dict[str,str]:
         try:

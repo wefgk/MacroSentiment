@@ -1,14 +1,15 @@
 import json
 import logging
-from openai import OpenAI
+from openai import AsyncOpenAI
+import time
 
 logger=logging.getLogger(__name__)
 
 class AIAnalyzer:
     def __init__(self,url:str,api_key:str):
-        self.client=OpenAI(base_url=url,api_key=api_key)
+        self.client=AsyncOpenAI(base_url=url,api_key=api_key)
 
-    def analyze_sentiment(self, text: str, geo_entities: list[str], model: str = "") -> dict[str, float]:
+    async def analyze_sentiment(self, text: str, geo_entities: list[str], model: str = "") -> dict[str, float]:
         entities_str = ", ".join(geo_entities)
         
         system_prompt = (
@@ -54,9 +55,10 @@ class AIAnalyzer:
                 }
             }
         }
-        
+
+        start_time=time.perf_counter()
         try:
-            response = self.client.chat.completions.create(
+            response = await self.client.chat.completions.create(
                 model=model,
                 messages=[{
                     "role": "user", 
@@ -79,7 +81,7 @@ class AIAnalyzer:
             #logger.info(f"ai_ratings - {ai_ratings}")
 
             if not isinstance(ai_ratings, dict):
-                logger.error(f"ИИ сломал структуру, ожидался словарь: {ai_ratings}")
+                logger.error(f"AI has destroyed the structure")
                 return {}
 
             clean_result = {
@@ -88,6 +90,8 @@ class AIAnalyzer:
                 if key in geo_entities
             }
             
+            execution_time=time.perf_counter()-start_time
+            logger.info(f"AI time spent on analyzing - {execution_time:.2f}")
             return clean_result
             
         except json.JSONDecodeError:
