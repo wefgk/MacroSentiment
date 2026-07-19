@@ -19,7 +19,6 @@ class NewsTransformer:
             with sqlite3.connect(self.db_path) as conn:
                 cursor=conn.cursor()
                 cursor.execute("SELECT key, country FROM entity_mapping")
-                logger.info("The relationships database loaded in memory")
                 return dict(cursor.fetchall())
         except sqlite3.Error as e:
             logger.error(e)
@@ -65,10 +64,9 @@ class NewsTransformer:
             else:
                 potential_name = ent.text.strip()
                     
-                    # Проверяем напрямую по белому списку стран
+                    
                 if potential_name in self.countries_whitelist:
                     countries.add(potential_name)
-                    # Или напрямую по альянсам (если spaCy нашла "NATO" как ORG)
                 elif potential_name in self.alliences_whitelist:
                     alliances.add(potential_name)
         return {"countries":list(countries),

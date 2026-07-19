@@ -1,8 +1,10 @@
 from database.db_manager import DataBaseManager
 from extractors.news_parser import pars_news
 from transforms.news_cleaner import NewsTransformer
+from transforms.AI_analyzer import AIAnalyzer
 import logging
 from pprint import pprint
+import time
 
 logging.basicConfig(
     level=logging.INFO, 
@@ -17,36 +19,56 @@ urls=["https://feeds.bbci.co.uk/news/world/rss.xml"]
 
 
 
-def main(urls:list):
-    data=pars_news(urls)
-    manager=DataBaseManager()
-    manager.insert_raw_news(data)
+def main(urls: list):
+    raw_data = pars_news(urls)
+    db = DataBaseManager()
+    db.insert_raw_news(raw_data)
 
+    unanalyzed_news = db.get_all_new_news()
 
-    data=manager.get_all_new_news()
-
-    if not data:
-        logger.info("There is no new data")
+    if not unanalyzed_news:
+        logger.info("There is no new data for analysis.")
         return
     
-    transformer=NewsTransformer()
+    transformer = NewsTransformer()
+    ai = AIAnalyzer(url = "http://localhost:1234/v1", api_key = "lm-studio")
 
-    news_and_country=[]
-    for item in data:
+    logger.info(f"Found {len(unanalyzed_news)} raw news. Starting pipeline")
 
-        full_text=f"{item.get("title")}. {item.get("description")}"
+    processed_logs = []
 
-        geo_data=transformer.extract_geo_data(full_text)
-        if not geo_data:
-            continue
+    for item in unanalyzed_news[:5]:
+        news_id = item.get("id")
+        title = item.get("title")
+        description = item.get("description")
         
-        if not geo_data["countries"] and not geo_data["alliances"]:
+        full_text = f"{title}. {description}"
+
+        geo_data = transformer.extract_geo_data(full_text)
+        
+        all_entities = geo_data["countries"] + geo_data["alliances"]
+
+        if not all_entities:
             continue
 
-        d={"news":full_text,"geo_data":geo_data}
-        news_and_country.append(d)
+
+        logger.info(f"Analyzing sentiment for news ID {news_id} targets: {all_entities}")
+        sentiment_ratings = ai.analyze_sentiment(full_text, all_entities,)
+        
+
+        if sentiment_ratings:
+            
+            processed_logs.append({
+                "news_id": news_id,
+                "title": title,
+                "geo_data": geo_data,
+                "ai_ratings": sentiment_ratings
+            })
+        time.sleep(0.1)
+            
     
-    pprint(news_and_country,sort_dicts=False)
+    print("\n=== PIPELINE SUCCESSFUL RESULTS ===")
+    pprint(processed_logs, sort_dicts=False)
         
 
 if __name__=="__main__":
