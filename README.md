@@ -1,4 +1,4 @@
-
+![Version](https://img.shields.io/badge/version-v1.0.0--prod-green?style=for-the-badge)
 # Global News Sentiment Data Pipeline
 
 An asynchronous Data Engineering pipeline that automatically scrapes global RSS news feeds, extracts mentioned countries using NLP (SpaCy), and analyzes news tone using a local LLM via an OpenAI-compatible API.
