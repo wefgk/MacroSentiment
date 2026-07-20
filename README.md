@@ -19,7 +19,7 @@ Instead of paying for expensive cloud APIs, this project shows how to build a re
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 * **Language:** Python 3.12 (Async architecture via `asyncio` and `httpx`)
 * **Database:** PostgreSQL + SQLAlchemy 2.0 (Async mode via `asyncpg`)
@@ -29,7 +29,7 @@ Instead of paying for expensive cloud APIs, this project shows how to build a re
 
 ---
 
-## ⚡ Performance Benchmarks & Core Metrics
+##  Performance Benchmarks & Core Metrics
 
 ### Real Pipeline Metrics from Logs
 
@@ -37,9 +37,9 @@ Instead of paying for expensive cloud APIs, this project shows how to build a re
 * **LLM Inference Speed:** ~8.68 seconds average processing time per news item. *Note: This includes full text analysis and multi-entity score generation per batch on local hardware.*
 * **Data Integrity:** Built-in `ON CONFLICT DO NOTHING` handling ensures that the pipeline is completely idempotent. It won't duplicate rows or waste LLM tokens if you run it multiple times on the same data.
 
-> **💡 How to make it faster:** While the current setup uses batching to process 3 articles at once sequentially (to avoid overloading the local GPU memory), the pipeline architecture is fully asynchronous. By shifting from a local model to high-throughput cloud APIs (like Groq, Together AI, or OpenAI), you can process multiple batches concurrently via `asyncio.gather`. This will scale the throughput heavily and cut down the per-article processing time to fractions of a second.
+> ** How to make it faster:** While the current setup uses batching to process 3 articles at once sequentially (to avoid overloading the local GPU memory), the pipeline architecture is fully asynchronous. By shifting from a local model to high-throughput cloud APIs (like Groq, Together AI, or OpenAI), you can process multiple batches concurrently via `asyncio.gather`. This will scale the throughput heavily and cut down the per-article processing time to fractions of a second.
 
-## 🚀 How to Run Locally
+##  How to Run Locally
 
 ### 1. LLM Server Setup
 
