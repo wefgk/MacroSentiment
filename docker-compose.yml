@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: news-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_password
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  pipeline:
+    build: .
+    container_name: news-pipeline
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_URL=postgresql+asyncpg://postgres:your_password@db:5432/postgres
+
+volumes:
+  pgdata:

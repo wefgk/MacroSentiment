@@ -1,23 +1,21 @@
 import httpx
+from httpx import RequestError,HTTPStatusError
 import logging
 from bs4 import BeautifulSoup
 import asyncio
+from tenacity import retry,stop_after_attempt,wait_exponential,retry_if_exception_type,before_sleep_log
 
 logger=logging.getLogger(__name__)
 
+@retry(stop=stop_after_attempt(3),
+       wait=wait_exponential(multiplier=1,min=1,max=10),
+       retry=retry_if_exception_type((RequestError,HTTPStatusError)),
+       before_sleep=before_sleep_log(logger,logging.WARNING),
+       retry_error_callback=lambda retry_state: [])
 async def _pars_news(client:httpx.AsyncClient, url:str)->list[dict[str,str]]:
 
     news_list=[]
-    try:
-        response=await client.get(url,timeout=7)
-        response.raise_for_status()
-    except httpx.HTTPStatusError as e:
-        logger.error(f"HTTP error occurred while fetching RSS from {url}: {e}")
-        return []
-    except httpx.RequestError as e:
-        logger.error(f"An error occurred while requesting {url}: {e}")
-        return []
-
+    response=await client.get(url,timeout=7)
 
     soup= await asyncio.to_thread(BeautifulSoup,response.text,"xml")
 
@@ -53,4 +51,6 @@ async def pars_news(RSS_urls:list)->list[dict[str:str]]:
     news_list=[news for sublist in results for news in sublist]
 
     logger.info("collected articles : %d" ,len(news_list))
+
+    return news_list
 
